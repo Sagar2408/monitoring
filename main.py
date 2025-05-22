@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
+import eventlet
+eventlet.monkey_patch()  # ✅ VERY IMPORTANT for websocket support
 
 app = Flask(__name__)
 CORS(app)
