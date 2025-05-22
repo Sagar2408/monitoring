@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Simple in-memory trigger map
 trigger_map = {}
@@ -36,7 +38,32 @@ def should_start():
 
 @app.route("/", methods=["GET"])
 def home():
-    return "Flask Stream Trigger Server Running!"
+    return "Flask Stream Trigger + Socket Server Running!"
+
+# ---------------- SocketIO Event Handlers ---------------- #
+
+@socketio.on("screen-data")
+def handle_screen(data):
+    executive_id = data.get("executiveId")
+    image = data.get("image")
+    emit("screen-data", {"executiveId": executive_id, "image": image}, broadcast=True)
+    print(f"[📺] screen-data from Exec {executive_id} broadcasted")
+
+@socketio.on("video-data")
+def handle_video(data):
+    executive_id = data.get("executiveId")
+    buffer = data.get("buffer")
+    emit("video-data", {"executiveId": executive_id, "buffer": buffer}, broadcast=True)
+    print(f"[🎥] video-data from Exec {executive_id} broadcasted")
+
+@socketio.on("audio-data")
+def handle_audio(data):
+    executive_id = data.get("executiveId")
+    buffer = data.get("buffer")
+    emit("audio-data", {"executiveId": executive_id, "buffer": buffer}, broadcast=True)
+    print(f"[🎙️] audio-data from Exec {executive_id} broadcasted")
+
+# ---------------------------------------------------------- #
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    socketio.run(app, host="0.0.0.0", port=5000)
