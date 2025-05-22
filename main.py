@@ -6,9 +6,11 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Simple in-memory trigger map
+# In-memory maps
 trigger_map = {}
 online_map = {}
+
+# -------------------- REST ROUTES -------------------- #
 
 @app.route("/heartbeat", methods=["POST"])
 def heartbeat():
@@ -40,30 +42,45 @@ def should_start():
 def home():
     return "Flask Stream Trigger + Socket Server Running!"
 
-# ---------------- SocketIO Event Handlers ---------------- #
+# -------------------- SOCKET EVENTS -------------------- #
 
 @socketio.on("screen-data")
 def handle_screen(data):
-    executive_id = data.get("executiveId")
+    executive_id = str(data.get("executiveId"))
+    exec_name = str(data.get("executiveName"))
     image = data.get("image")
-    emit("screen-data", {"executiveId": executive_id, "image": image}, broadcast=True)
-    print(f"[📺] screen-data from Exec {executive_id} broadcasted")
+    emit("screen-data", {
+        "executiveId": executive_id,
+        "executiveName": exec_name,
+        "image": image
+    }, broadcast=True)
+    print(f"[📺] screen-data from Exec {executive_id} ({exec_name}) broadcasted")
 
 @socketio.on("video-data")
 def handle_video(data):
-    executive_id = data.get("executiveId")
+    executive_id = str(data.get("executiveId"))
+    exec_name = str(data.get("executiveName"))
     buffer = data.get("buffer")
-    emit("video-data", {"executiveId": executive_id, "buffer": buffer}, broadcast=True)
-    print(f"[🎥] video-data from Exec {executive_id} broadcasted")
+    emit("video-data", {
+        "executiveId": executive_id,
+        "executiveName": exec_name,
+        "buffer": buffer
+    }, broadcast=True)
+    print(f"[🎥] video-data from Exec {executive_id} ({exec_name}) broadcasted")
 
 @socketio.on("audio-data")
 def handle_audio(data):
-    executive_id = data.get("executiveId")
+    executive_id = str(data.get("executiveId"))
+    exec_name = str(data.get("executiveName"))
     buffer = data.get("buffer")
-    emit("audio-data", {"executiveId": executive_id, "buffer": buffer}, broadcast=True)
-    print(f"[🎙️] audio-data from Exec {executive_id} broadcasted")
+    emit("audio-data", {
+        "executiveId": executive_id,
+        "executiveName": exec_name,
+        "buffer": buffer
+    }, broadcast=True)
+    print(f"[🎙️] audio-data from Exec {executive_id} ({exec_name}) broadcasted")
 
-# ---------------------------------------------------------- #
+# ---------------------- MAIN ---------------------- #
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)
