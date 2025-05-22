@@ -1,18 +1,19 @@
+import eventlet
+eventlet.monkey_patch()  # ✅ must be first
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
-import eventlet
-eventlet.monkey_patch()  # ✅ VERY IMPORTANT for websocket support
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-# In-memory maps
+# ✅ use eventlet mode for socketio
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+
+# ---------------- Memory maps ----------------
 trigger_map = {}
 online_map = {}
-
-# -------------------- REST ROUTES -------------------- #
 
 @app.route("/heartbeat", methods=["POST"])
 def heartbeat():
@@ -44,7 +45,7 @@ def should_start():
 def home():
     return "Flask Stream Trigger + Socket Server Running!"
 
-# -------------------- SOCKET EVENTS -------------------- #
+# ---------------- Socket.IO events ----------------
 
 @socketio.on("screen-data")
 def handle_screen(data):
@@ -82,7 +83,6 @@ def handle_audio(data):
     }, broadcast=True)
     print(f"[🎙️] audio-data from Exec {executive_id} ({exec_name}) broadcasted")
 
-# ---------------------- MAIN ---------------------- #
-
+# ---------------- MAIN ----------------
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)
