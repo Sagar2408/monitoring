@@ -6,7 +6,7 @@ eventlet.monkey_patch()  # ✅ VERY IMPORTANT for websocket support
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # In-memory maps
 trigger_map = {}
