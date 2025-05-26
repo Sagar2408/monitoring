@@ -27,7 +27,7 @@ def heartbeat():
 def trigger_stream():
     data = request.get_json()
     executive_id = str(data.get("executive_id"))
-    stream = data.get("stream")
+    stream = data.get("stream_type")  # ✅ FIXED LINE
     trigger_map[executive_id] = stream
     print(f"[⚡] Admin triggered '{stream}' for Executive {executive_id}")
     return jsonify({"status": "triggered"})
